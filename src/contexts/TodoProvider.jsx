@@ -10,6 +10,10 @@ const todoReducer = (state, action) => {
       return state.map(todo =>
         todo.id === action.payload ? { ...todo, completed: !todo.completed } : todo
       );
+    case 'EDIT_TODO':
+      return state.map(todo =>
+        todo.id === action.payload.id ? { ...todo, text: action.payload.text } : todo
+      );
     case 'DELETE_TODO':
       return state.filter(todo => todo.id !== action.payload);
     default:
