@@ -1,16 +1,23 @@
+import { useContext, useState } from "react"; 
 import { FaPen } from "react-icons/fa6";
 import { TodoContext } from "../../contexts/TodoProvider";
-import { useContext, useState } from "react";
+import { toast } from "../../stores/ToastStore";
 
 const TodoAdd = () => {
     const { dispatch } = useContext(TodoContext);
+
     const [input, setInput] = useState('');
+
     const handleAdd = () => {
         if (input.trim()) {
             dispatch({ type: 'ADD_TODO', payload: input });
+            toast.success('Todo added.');
             setInput('');
+        } else {
+            toast.error('Please enter a todo.');
         }
     };
+
     return (<>
         <div className="mb-8">
             <div className="flex gap-2">
