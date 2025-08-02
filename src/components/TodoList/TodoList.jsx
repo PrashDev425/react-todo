@@ -2,6 +2,7 @@ import { useContext, useMemo } from 'react';
 import { FaCheck, FaEdit, FaTrash } from 'react-icons/fa';
 import { TodoContext } from '../../contexts/TodoProvider';
 import './TodoList.css';
+import { toast } from '../../stores/ToastStore';
 
 const TodoList = () => {
   const { todos, dispatch } = useContext(TodoContext);
@@ -10,25 +11,43 @@ const TodoList = () => {
     return todos.some(todo => todo.completed);
   }, [todos]);
 
-  const handleComplete = (id) => {
+  const handleComplete = (id, isCompleted) => {
     dispatch({ type: 'TOGGLE_TODO', payload: id });
+
+    if (isCompleted) {
+      toast.info('Todo marked as incomplete.');
+    } else {
+      toast.success('Todo marked as complete.');
+    }
   };
 
   const handleDelete = (id) => {
     dispatch({ type: 'DELETE_TODO', payload: id });
+    toast.success('Todo deleted.');
   };
 
   const handleEdit = (id, currentText) => {
     const newText = prompt('Edit todo:', currentText);
     if (newText && newText !== currentText) {
       dispatch({ type: 'EDIT_TODO', payload: { id, text: newText } });
+      toast.success('Todo updated.');
+    } else if (newText === currentText) {
+      toast.warning('No changes made.');
+    } else {
+      toast.info('Todo edit cancelled.');
     }
   };
 
   const handleClearCompleted = () => {
-    todos
-      .filter(todo => todo.completed)
-      .forEach(todo => dispatch({ type: 'DELETE_TODO', payload: todo.id }));
+    const completedTodos = todos.filter(todo => todo.completed);
+    if (completedTodos.length > 0) {
+      completedTodos.forEach(todo =>
+        dispatch({ type: 'DELETE_TODO', payload: todo.id })
+      );
+      toast.success(`${completedTodos.length} completed todos cleared.`);
+    } else {
+      toast.info('No completed todos to clear.');
+    }
   };
 
   const itemsLeft = todos.filter(todo => !todo.completed).length;
@@ -49,7 +68,7 @@ const TodoList = () => {
                     ? 'bg-primary dark:bg-primary-dark border-primary dark:border-primary-dark'
                     : 'border-gray-300 dark:border-gray-600'
                     }`}
-                  onClick={() => handleComplete(todo.id)}
+                  onClick={() => handleComplete(todo.id, todo.completed)}
                 >
                   {todo.completed && <FaCheck className="text-white text-xs" />}
                 </button>
@@ -94,7 +113,6 @@ const TodoList = () => {
           Clear completed
         </button>
       </div>
-
     </div>
   );
 };
